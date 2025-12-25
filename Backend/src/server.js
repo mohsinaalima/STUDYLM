@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs"; // We'll use this to ensure the folder exists
-
+import { getTranscript } from './services/youtubeService.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -23,7 +23,12 @@ const storage = multer.diskStorage({
   },
 });
 
+
+
 const upload = multer({ storage: storage });
+
+
+
 app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
   try {
     if (!req.file) {
@@ -40,6 +45,25 @@ app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.post('/api/process-video', async (req, res) => {
+    const { url } = req.body; // Frontend sends { "url": "..." }
+
+    if (!url) {
+        return res.status(400).json({ error: "No URL provided" });
+    }
+
+    try {
+        const transcript = await getTranscript(url);
+        res.status(200).json({
+            message: "Video processed!",
+            transcriptSnippet: transcript.substring(0, 200) + "..."
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 app.get("/", (req, res) => {
   res.send("StudyLM Backend is running! ");
