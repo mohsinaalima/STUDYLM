@@ -29,16 +29,25 @@ export default function IngestionZone({ onDataLoaded }) {
         method: "POST",
         body: formData,
       });
+
       const data = await response.json();
-      onDataLoaded(data.textSnippet); // Pass the data up to the parent
+
+      if (!response.ok || !data.textContent) {
+        throw new Error(data.error || "PDF processing failed");
+      }
+
+      onDataLoaded(data.textContent);
     } catch (error) {
-      console.error("Upload failed", error);
+      console.error("Upload failed:", error.message);
+      alert("PDF upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleYoutubeSubmit = async () => {
+    if (!youtubeUrl) return;
+
     setLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/process-video", {
@@ -46,10 +55,17 @@ export default function IngestionZone({ onDataLoaded }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl }),
       });
+
       const data = await response.json();
-      onDataLoaded(data.transcriptSnippet);
+
+      if (!response.ok || !data.textContent) {
+        throw new Error(data.error || "Video processing failed");
+      }
+
+      onDataLoaded(data.textContent);
     } catch (error) {
-      console.error("Video processing failed", error);
+      console.error("Video processing failed:", error.message);
+      alert("YouTube processing failed. Please try another video.");
     } finally {
       setLoading(false);
     }
@@ -62,9 +78,10 @@ export default function IngestionZone({ onDataLoaded }) {
           <FileText className='text-blue-500' /> Study Source Ingestion
         </CardTitle>
         <CardDescription>
-          Upload your Economics textbook chapter or a lecture video.
+          Upload your textbook PDF or paste a YouTube lecture link.
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <Tabs defaultValue='pdf' className='w-full'>
           <TabsList className='grid w-full grid-cols-2 mb-6'>

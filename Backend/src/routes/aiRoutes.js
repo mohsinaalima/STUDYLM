@@ -5,53 +5,73 @@ import { getTranscript } from "../services/youtubeService.js";
 import { aiService } from "../services/aiService.js";
 
 const router = express.Router();
+
+// Multer config
 const upload = multer({ dest: "uploads/" });
 
-// PDF Ingestion
+/* =======================
+   PDF UPLOAD ROUTE
+======================= */
 router.post("/upload-pdf", upload.single("pdf"), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No PDF file uploaded" });
+    }
+
     const text = await extractTextFromPDF(req.file.path);
     res.json({ textContent: text });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("PDF Upload Error:", error);
+    res.status(500).json({ error: "PDF processing failed" });
   }
 });
 
-// YouTube Ingestion
+/* =======================
+   YOUTUBE ROUTE
+======================= */
 router.post("/process-video", async (req, res) => {
   try {
-    const text = await getTranscript(req.body.url);
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: "YouTube URL missing" });
+    }
+
+    const text = await getTranscript(url);
     res.json({ textContent: text });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("YouTube Error:", error);
+    res.status(500).json({ error: "Video processing failed" });
   }
 });
 
-// Dialogue Generation
+/* =======================
+   AI DIALOGUE ROUTE
+======================= */
 router.post("/generate-dialogue", async (req, res) => {
-  const { textContent } = req.body;
   try {
-    // 🧠 Here is the brain at work
+    const { textContent } = req.body;
+
+    if (!textContent || textContent.length < 10) {
+      return res.status(400).json({
+        error: "Text content is empty or too short",
+      });
+    }
+
     const script = await aiService.generateDialogue(textContent);
+
+    if (!script) {
+      return res.status(500).json({
+        error: "AI returned empty response",
+      });
+    }
+
     res.json({ script });
   } catch (error) {
-    res.status(500).json({ error: "Dialogue generation failed" });
+    console.error("Generate Dialogue Error:", error);
+    res.status(500).json({
+      error: "AI processing failed",
+    });
   }
 });
-
-router.post("/generate-summary", async (req, res) => {
-  const { textContent } = req.body;
-  try {
-    const summaryString = await aiService.generateSummary(textContent);
-    
-    // 💡 Pro Tip: We should ask Gemini to return JSON so the dashboard can read it
-    // For now, let's assume it returns structured text we can parse
-    res.json({ summary: summaryString });
-  } catch (error) {
-    res.status(500).json({ error: "Summary generation failed" });
-  }
-});
-
-
 
 export default router;

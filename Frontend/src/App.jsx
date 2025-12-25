@@ -6,9 +6,9 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [studyData, setStudyData] = useState(null);
 
-  // 🏃‍♂️ This function handles the "Relay"
   const processToDialogue = async (text) => {
     setIsProcessing(true);
+
     try {
       const response = await fetch(
         "http://localhost:3000/api/generate-dialogue",
@@ -18,20 +18,25 @@ function App() {
           body: JSON.stringify({ textContent: text }),
         }
       );
+
       const data = await response.json();
 
-      // Parse the "Teacher: [Text]" format into objects
+      if (!response.ok || !data.script) {
+        throw new Error(data.error || "AI failed");
+      }
+
       const script = data.script
         .split("\n")
         .filter((l) => l.includes(":"))
         .map((l) => ({
           role: l.split(":")[0].trim(),
-          message: l.split(":")[1].trim(),
+          message: l.split(":").slice(1).join(":").trim(),
         }));
 
       setStudyData(script);
     } catch (err) {
-      console.error(err);
+      console.error("Dialogue Error:", err.message);
+      alert("AI failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
