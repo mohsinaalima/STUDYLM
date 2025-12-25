@@ -1,80 +1,14 @@
 import express from "express";
-import multer from "multer";
-import path from "path";
-import fs from "fs"; 
-import dotenv from 'dotenv';
-import { getTranscript } from './services/youtubeService.js';
-
+import cors from "cors";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
-
-
-dotenv.config();
-
-const uploadDir = "./uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
+app.use(cors());
 app.use(express.json());
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
+app.use("/api", aiRoutes);
 
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-
-
-const upload = multer({ storage: storage });
-
-
-
-app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Please upload a PDF file." });
-    }
-
-    const extractedText = await extractTextFromPDF(req.file.path);
-
-    res.status(200).json({
-      message: "File uploaded and processed!",
-      textSnippet: extractedText.substring(0, 200) + "...", // Just a preview
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/process-video', async (req, res) => {
-    const { url } = req.body; // Frontend sends { "url": "..." }
-
-    if (!url) {
-        return res.status(400).json({ error: "No URL provided" });
-    }
-
-    try {
-        const transcript = await getTranscript(url);
-        res.status(200).json({
-            message: "Video processed!",
-            transcriptSnippet: transcript.substring(0, 200) + "..."
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-app.get("/", (req, res) => {
-  res.send("StudyLM Backend is running! ");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(3000, () => {
+  console.log("Server running on port 3000 🚀");
 });
