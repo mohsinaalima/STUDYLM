@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import fs from "fs"; // We'll use this to ensure the folder exists
+import fs from "fs"; 
 import dotenv from 'dotenv';
 import { getTranscript } from './services/youtubeService.js';
 
