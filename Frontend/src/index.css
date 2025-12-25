@@ -121,3 +121,41 @@
     @apply bg-background text-foreground;
   }
 }
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 0 0% 0%; /* Pure Black */
+    --primary: 0 0% 0%; /* Black Buttons */
+    --primary-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --border: 0 0% 90%; /* Light Gray Border */
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+  }
+
+  .dark {
+    --background: 0 0% 0%; /* Pure Black */
+    --foreground: 0 0% 100%; /* Pure White */
+    --primary: 0 0% 100%; /* White Buttons */
+    --primary-foreground: 0 0% 0%;
+    --card: 0 0% 5%; /* Very Dark Gray */
+    --card-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+  }
+}
+
+/* Custom Animation Class */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
