@@ -2,10 +2,16 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs"; // We'll use this to ensure the folder exists
+import dotenv from 'dotenv';
 import { getTranscript } from './services/youtubeService.js';
+
+
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
+
+dotenv.config();
 
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) {
