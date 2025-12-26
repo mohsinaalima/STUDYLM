@@ -6,12 +6,15 @@ import { aiService } from "../services/aiService.js";
 
 const router = express.Router();
 
-// Multer config
-const upload = multer({ dest: "uploads/" });
 
-/* =======================
-   PDF UPLOAD ROUTE
-======================= */
+
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const upload = multer({ dest: path.join(__dirname, "../../uploads") });
+
+
 router.post("/upload-pdf", upload.single("pdf"), async (req, res) => {
   try {
     if (!req.file) {
