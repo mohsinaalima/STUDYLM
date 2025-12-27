@@ -31,6 +31,7 @@ export default function IngestionZone({ onDataLoaded }) {
       });
 
       const data = await response.json();
+      onDataLoaded(data.textContent);
 
       if (!response.ok || !data.textContent) {
         throw new Error(data.error || "PDF processing failed");
@@ -57,6 +58,7 @@ export default function IngestionZone({ onDataLoaded }) {
       });
 
       const data = await response.json();
+      onDataLoaded(data.textContent);
 
       if (!response.ok || !data.textContent) {
         throw new Error(data.error || "Video processing failed");
